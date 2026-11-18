@@ -76,7 +76,9 @@ function Signup() {
                         ? "is-done"
                         : ""
                   }
-                  aria-current={index === step && !complete ? "step" : undefined}
+                  aria-current={
+                    index === step && !complete ? "step" : undefined
+                  }
                 >
                   <span className="su-steps__dot">
                     {index < step || complete ? "✓" : index + 1}
@@ -118,7 +120,9 @@ function Signup() {
 
         <main className="su-main">
           <div className="su-top">
-            <a className="su-top__back" href="/">← Back to homepage</a>
+            <a className="su-top__back" href="/">
+              ← Back to homepage
+            </a>
             <div className="su-top__account">
               <span>Already have an account?</span>
               <a href="/login">Log in</a>
@@ -227,7 +231,9 @@ function Signup() {
               {step === 2 && (
                 <>
                   <h1 tabIndex="-1">Review your details.</h1>
-                  <p className="su-sub">Make sure your information is correct.</p>
+                  <p className="su-sub">
+                    Make sure your information is correct.
+                  </p>
                   <div className="su-review">
                     <div>
                       <small>Business type</small>

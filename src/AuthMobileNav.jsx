@@ -10,13 +10,25 @@ export default function AuthMobileNav() {
           <span className="logo__dot" /> ScanServe
         </a>
         <div className={`nav__links ${open ? "is-open" : ""}`}>
-          <a href="/#how" onClick={() => setOpen(false)}>How it works</a>
-          <a href="/#features" onClick={() => setOpen(false)}>Features</a>
-          <a href="/#pricing" onClick={() => setOpen(false)}>Pricing</a>
-          <a href="/#faq" onClick={() => setOpen(false)}>FAQ</a>
-          <a href="/login" onClick={() => setOpen(false)}>Log in</a>
+          <a href="/#how" onClick={() => setOpen(false)}>
+            How it works
+          </a>
+          <a href="/#features" onClick={() => setOpen(false)}>
+            Features
+          </a>
+          <a href="/#pricing" onClick={() => setOpen(false)}>
+            Pricing
+          </a>
+          <a href="/#faq" onClick={() => setOpen(false)}>
+            FAQ
+          </a>
+          <a href="/login" onClick={() => setOpen(false)}>
+            Log in
+          </a>
         </div>
-        <a href="/signup" className="btn btn--dark">Get started</a>
+        <a href="/signup" className="btn btn--dark">
+          Get started
+        </a>
         <button
           type="button"
           className="burger"
