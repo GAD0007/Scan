@@ -1,16 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import "./BusinessDashboard.supplied.css";
+import { Icon } from "./Icons";
+import jollofRiceImage from "./assets/menu/jollof-rice.jpg";
+import grilledChickenImage from "./assets/menu/grilled-chicken.jpg";
+import chapmanImage from "./assets/menu/chapman.jpg";
+import zoboImage from "./assets/menu/zobo.jpg";
+import puffPuffImage from "./assets/menu/puff-puff.jpg";
+import "./BusinessDashboard.css";
 
 const STATIONS = ["Kitchen", "Bar", "Counter"];
 const NAV = [
-  ["orders", "Live orders", "ðŸ§¾"],
-  ["catalogue", "Catalogue", "ðŸ½ï¸"],
-  ["qr", "QR codes", "â–¦"],
-  ["payments", "Payments", "ðŸ’³"],
-  ["reports", "Reports", "ðŸ“Š"],
-  ["team", "Team", "ðŸ‘¥"],
-  ["settings", "Settings", "âš™ï¸"],
+  ["orders", "Live orders", "orders"],
+  ["catalogue", "Catalogue", "catalogue"],
+  ["qr", "QR codes", "qr"],
+  ["payments", "Payments", "payments"],
+  ["reports", "Reports", "reports"],
+  ["team", "Team", "team"],
+  ["settings", "Settings", "settings"],
 ];
 const COLS = [
   ["new", "New"],
@@ -22,14 +28,14 @@ const NEXT = {
   preparing: ["ready", "Mark ready"],
   ready: ["done", "Mark done"],
 };
-const naira = (amount) => `â‚¦${amount.toLocaleString("en-NG")}`;
+const naira = (amount) => `\u20A6${amount.toLocaleString("en-NG")}`;
 const minutesAgo = (time) => Math.floor((Date.now() - time) / 60000);
 
 const seedOrders = [
   {
     id: 1041,
     loc: "Table 5",
-    items: ["2Ã— Jollof rice", "1Ã— Chapman"],
+    items: ["2\u00D7 Jollof rice", "1\u00D7 Chapman"],
     station: "Kitchen",
     pay: "paid",
     method: "Paystack",
@@ -40,7 +46,7 @@ const seedOrders = [
   {
     id: 1040,
     loc: "Counter",
-    items: ["1Ã— Zobo", "1Ã— Puff puff"],
+    items: ["1\u00D7 Zobo", "1\u00D7 Puff puff"],
     station: "Bar",
     pay: "unpaid",
     method: "Cash",
@@ -51,7 +57,7 @@ const seedOrders = [
   {
     id: 1039,
     loc: "Table 2",
-    items: ["1Ã— Grilled chicken", "1Ã— Fries"],
+    items: ["1\u00D7 Grilled chicken", "1\u00D7 Fries"],
     station: "Kitchen",
     pay: "paid",
     method: "Monnify",
@@ -62,7 +68,7 @@ const seedOrders = [
   {
     id: 1038,
     loc: "Table 8",
-    items: ["3Ã— Suya"],
+    items: ["3\u00D7 Suya"],
     station: "Kitchen",
     pay: "paid",
     method: "Paystack",
@@ -74,21 +80,21 @@ const seedOrders = [
 const sampleNewOrders = [
   {
     loc: "Table 3",
-    items: ["1Ã— Fried rice", "2Ã— Malt"],
+    items: ["1\u00D7 Fried rice", "2\u00D7 Malt"],
     station: "Kitchen",
     method: "POS",
     total: 5400,
   },
   {
     loc: "Room 4",
-    items: ["2Ã— Chapman"],
+    items: ["2\u00D7 Chapman"],
     station: "Bar",
     method: "Paystack",
     total: 3000,
   },
   {
     loc: "Counter",
-    items: ["1Ã— Meat pie"],
+    items: ["1\u00D7 Meat pie"],
     station: "Counter",
     method: "Cash",
     total: 1200,
@@ -100,7 +106,7 @@ const seedItems = [
     name: "Jollof rice",
     cat: "Meals",
     price: 2500,
-    emoji: "ðŸ›",
+    image: jollofRiceImage,
     sold: false,
     addons: ["Extra chicken", "Plantain"],
   },
@@ -109,7 +115,7 @@ const seedItems = [
     name: "Grilled chicken",
     cat: "Meals",
     price: 4000,
-    emoji: "ðŸ—",
+    image: grilledChickenImage,
     sold: false,
     addons: ["Pepper sauce"],
   },
@@ -118,7 +124,7 @@ const seedItems = [
     name: "Chapman",
     cat: "Drinks",
     price: 1500,
-    emoji: "ðŸ¹",
+    image: chapmanImage,
     sold: false,
     addons: [],
   },
@@ -127,7 +133,7 @@ const seedItems = [
     name: "Zobo",
     cat: "Drinks",
     price: 1000,
-    emoji: "ðŸ¥¤",
+    image: zoboImage,
     sold: true,
     addons: [],
   },
@@ -136,7 +142,7 @@ const seedItems = [
     name: "Puff puff",
     cat: "Sides",
     price: 700,
-    emoji: "ðŸ©",
+    image: puffPuffImage,
     sold: false,
     addons: [],
   },
@@ -164,6 +170,7 @@ function Toggle({ on, onChange, label }) {
 
 function Orders({ orders, setOrders, open, sound, setSound }) {
   const [station, setStation] = useState("All");
+  const [activeStatus, setActiveStatus] = useState("new");
   const [, tick] = useState(0);
   const nextId = useRef(0);
   useEffect(() => {
@@ -202,6 +209,12 @@ function Orders({ orders, setOrders, open, sound, setSound }) {
   const filteredOrders = orders.filter(
     (order) => station === "All" || order.station === station,
   );
+  const statusCounts = Object.fromEntries(
+    COLS.map(([key]) => [
+      key,
+      filteredOrders.filter((order) => order.status === key).length,
+    ]),
+  );
 
   return (
     <>
@@ -224,7 +237,8 @@ function Orders({ orders, setOrders, open, sound, setSound }) {
             className="bd-ghost"
             onClick={() => setSound(!sound)}
           >
-            {sound ? "ðŸ”” Sound on" : "ðŸ”• Sound off"}
+            <Icon name={sound ? "bell" : "bellOff"} size={16} />
+            {sound ? "Sound on" : "Sound off"}
           </button>
           <button
             type="button"
@@ -238,17 +252,41 @@ function Orders({ orders, setOrders, open, sound, setSound }) {
       </div>
       {!open && (
         <p className="bd-note">
-          Ordering is paused. Customers canâ€™t place new orders until you
+          Ordering is paused. Customers can&rsquo;t place new orders until you
           switch to Open.
         </p>
       )}
+      <div className="bd-status-tabs" role="tablist" aria-label="Order status">
+        {COLS.map(([key, title]) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeStatus === key}
+            key={key}
+            className={`bd-status-tab status-${key}${activeStatus === key ? " is-on" : ""}`}
+            onClick={() => setActiveStatus(key)}
+          >
+            <span>{title}</span>
+            <b>{statusCounts[key]}</b>
+          </button>
+        ))}
+      </div>
       <div className="bd-board">
         {COLS.map(([key, title]) => {
-          const list = filteredOrders.filter((order) => order.status === key);
+          const list = filteredOrders
+            .filter((order) => order.status === key)
+            .sort((a, b) => b.t - a.t);
           return (
-            <section key={key} className="bd-column">
+            <section
+              key={key}
+              className={`bd-column status-${key}${activeStatus === key ? " is-mobile-active" : ""}`}
+              aria-label={`${title} orders`}
+            >
               <h3>
-                {title}
+                <span className="bd-status-heading">
+                  <i aria-hidden="true" />
+                  {title}
+                </span>
                 <span className="bd-count">{list.length}</span>
               </h3>
               {list.length === 0 && (
@@ -263,7 +301,9 @@ function Orders({ orders, setOrders, open, sound, setSound }) {
                   >
                     <header>
                       <b>#{order.id}</b>
-                      <span className="bd-location">â–¦ {order.loc}</span>
+                      <span className="bd-location">
+                        <Icon name="pin" size={14} /> {order.loc}
+                      </span>
                       <span
                         className={`bd-wait${elapsed >= 10 && key !== "done" ? " is-late" : ""}`}
                       >
@@ -278,8 +318,8 @@ function Orders({ orders, setOrders, open, sound, setSound }) {
                     <footer>
                       <span className={`bd-pill ${order.pay}`}>
                         {order.pay === "paid"
-                          ? `Paid Â· ${order.method}`
-                          : `Unpaid Â· ${order.method}`}
+                          ? `Paid \u00B7 ${order.method}`
+                          : `Unpaid \u00B7 ${order.method}`}
                       </span>
                       <span className="bd-station">{order.station}</span>
                     </footer>
@@ -342,7 +382,7 @@ function Catalogue({ items, setItems }) {
     );
   const importPhoto = (event) => {
     if (!event.target.files?.[0]) return;
-    setMessage("Reading your menu photoâ€¦");
+    setMessage("Reading your menu photo\u2026");
     window.setTimeout(() => {
       setItems((current) => [
         ...current,
@@ -351,7 +391,7 @@ function Catalogue({ items, setItems }) {
           name,
           cat: "Imported",
           price: 0,
-          emoji: "ðŸ§¾",
+          image: [jollofRiceImage, grilledChickenImage, chapmanImage][index],
           sold: false,
           addons: [],
           review: true,
@@ -393,13 +433,15 @@ function Catalogue({ items, setItems }) {
               key={item.id}
               className={`bd-item${item.sold ? " is-sold" : ""}`}
             >
-              <div className="bd-product-icon">{item.emoji}</div>
+              <div className="bd-product-icon">
+                <img src={item.image} alt="" />
+              </div>
               <div className="bd-grow">
                 <b>{item.name}</b>
                 <small>
                   {item.cat}
                   {item.addons.length
-                    ? ` Â· Add-ons: ${item.addons.join(", ")}`
+                    ? ` \u00B7 Add-ons: ${item.addons.join(", ")}`
                     : ""}
                 </small>
                 <label className="bd-price-label">
@@ -527,7 +569,7 @@ function Payments({ orders, setOrders }) {
           <div key={order.id} className="bd-item">
             <div className="bd-grow">
               <b>
-                #{order.id} Â· {order.loc}
+                #{order.id} &middot; {order.loc}
               </b>
               <small>{order.method}</small>
             </div>
@@ -582,7 +624,7 @@ function Reports({ orders }) {
     <>
       <div className="bd-cards-three">
         <div className="bd-card">
-          <small>Todayâ€™s sales</small>
+          <small>Today&rsquo;s sales</small>
           <strong>{naira(sales)}</strong>
         </div>
         <div className="bd-card">
@@ -821,6 +863,9 @@ export default function BusinessDashboard() {
     setPage(id);
     setMore(false);
   };
+  const logOut = () => {
+    window.location.assign("/login");
+  };
 
   return (
     <div className="bd">
@@ -837,11 +882,23 @@ export default function BusinessDashboard() {
             className={`bd-nav-item${page === id ? " is-on" : ""}`}
             onClick={() => go(id)}
           >
-            <span>{icon}</span>
+            <span>
+              <Icon name={icon} />
+            </span>
             {label}
             {id === "orders" && newCount > 0 && <em>{newCount}</em>}
           </button>
         ))}
+        <button
+          type="button"
+          className="bd-nav-item bd-logout"
+          onClick={logOut}
+        >
+          <span>
+            <Icon name="logout" />
+          </span>
+          Log out
+        </button>
         <div className="bd-sidebar-help">
           <span>Need a hand?</span>
           <b>Visit the help centre</b>
@@ -851,7 +908,6 @@ export default function BusinessDashboard() {
       <div className="bd-main">
         <header className="bd-topbar">
           <div className="bd-top-copy">
-            <small>Welcome back</small>
             <b className="bd-business-name">{name}</b>
           </div>
           <div className="bd-top-actions">
@@ -860,14 +916,14 @@ export default function BusinessDashboard() {
               className="bd-icon-button"
               aria-label="Search"
             >
-              ⌕
+              <Icon name="search" size={18} />
             </button>
             <button
               type="button"
               className="bd-icon-button"
               aria-label="Notifications"
             >
-              ●
+              <Icon name="bell" size={18} />
             </button>
             <label className="bd-open-status">
               <span>{isOpen ? "Open" : "Closed"}</span>
@@ -916,10 +972,18 @@ export default function BusinessDashboard() {
         <div className="bd-more-sheet">
           {NAV.slice(4).map(([id, label, icon]) => (
             <button type="button" key={id} onClick={() => go(id)}>
-              <span>{icon}</span>
+              <span>
+                <Icon name={icon} />
+              </span>
               {label}
             </button>
           ))}
+          <button type="button" className="bd-logout" onClick={logOut}>
+            <span>
+              <Icon name="logout" />
+            </span>
+            Log out
+          </button>
         </div>
       )}
       <nav className="bd-mobile-tabs" aria-label="Dashboard sections">
@@ -931,7 +995,7 @@ export default function BusinessDashboard() {
             onClick={() => go(id)}
           >
             <span>
-              {icon}
+              <Icon name={icon} />
               {id === "orders" && newCount > 0 && <em>{newCount}</em>}
             </span>
             {label.replace("Live orders", "Orders")}
@@ -944,7 +1008,10 @@ export default function BusinessDashboard() {
           }
           onClick={() => setMore((value) => !value)}
         >
-          <span>â€¢â€¢â€¢</span>More
+          <span>
+            <Icon name="more" />
+          </span>
+          More
         </button>
       </nav>
     </div>
