@@ -1,4 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
+import cafeHeroImage from "./assets/hero/cafe-barista.jpg";
+import restaurantHeroImage from "./assets/hero/restaurant.jpg";
+import hotelHeroImage from "./assets/hero/hotel.jpg";
+import retailHeroImage from "./assets/hero/retail.jpg";
 
 const BRAND = "ScanServe";
 // Replace these example contact numbers with confirmed support numbers.
@@ -7,10 +11,37 @@ const SUPPORT_WHATSAPP = "+234 800 000 0001";
 const digits = (value) => value.replace(/[^\d+]/g, "");
 
 const NAV = [
-  { label: "How it works", href: "#how" },
+  { label: "Industries", href: "#industries" },
   { label: "Features", href: "#features" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
+];
+
+const HERO_SLIDES = [
+  {
+    image: cafeHeroImage,
+    category: "Cafés",
+    name: "Sunday Coffee",
+    alt: "Barista preparing coffee in a modern café",
+  },
+  {
+    image: restaurantHeroImage,
+    category: "Restaurants",
+    name: "Pepper & Palm",
+    alt: "Chef plating a meal in a welcoming restaurant",
+  },
+  {
+    image: hotelHeroImage,
+    category: "Hotels",
+    name: "Azure Palm Hotel",
+    alt: "Guest being welcomed at a boutique hotel reception",
+  },
+  {
+    image: retailHeroImage,
+    category: "Shops & retail",
+    name: "Mode & Co.",
+    alt: "Shop owner arranging products in a modern boutique",
+  },
 ];
 
 const VENUES = [
@@ -352,280 +383,157 @@ function Nav() {
 
 /* ---------- Hero ---------- */
 function Hero() {
-  const [name, setName] = useState("");
-  return (
-    <section className="hero">
-      <div className="wrap hero__grid">
-        <div className="hero__copy">
-          <span className="badge">✦ For businesses across Africa</span>
-          <h1>
-            Scan once,
-            <br />
-            <em>you're there.</em>
-          </h1>
-          <p>
-            Customers scan once to land on your business page. They can browse,
-            order or make a request, pay you directly and track what happens
-            next.
-          </p>
-          <form
-            className="signup"
-            onSubmit={(e) => {
-              e.preventDefault();
-              window.location.href = `/signup?business=${encodeURIComponent(name)}`;
-            }}
-          >
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your business name"
-              aria-label="Business name"
-            />
-            <button className="btn btn--tomato">Try it free</button>
-          </form>
-          <small className="hero__note">
-            No app to download · No customer account needed
-          </small>
-        </div>
-
-        <div className="hero__art" aria-hidden>
-          <div className="blob" />
-          <div className="tent">
-            <small>{BRAND}</small>
-            <div className="tent__qr">
-              <FakeQR />
-            </div>
-            <b>Scan to order</b>
-            <span>Your business page</span>
-          </div>
-          <Phone screen={1} />
-          <div className="sticker">
-            <span>
-              No app
-              <br />
-              to download
-            </span>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- Marquee ---------- */
-function Marquee() {
-  const items = [...VENUES, ...VENUES];
-  return (
-    <div className="marquee" aria-hidden>
-      <div className="marquee__track">
-        {items.map((v, i) => (
-          <span key={i}>
-            {v} <i>✦</i>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ---------- How it works (interactive) ---------- */
-const STEP_VH = 35;
-
-function How() {
-  const [active, setActive] = useState(0);
-  const sectionRef = useRef(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const slide = HERO_SLIDES[activeSlide];
 
   useEffect(() => {
-    let frame = null;
-
-    const update = () => {
-      if (frame !== null) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = null;
-        if (window.innerWidth < 760 || !sectionRef.current) return;
-
-        const rect = sectionRef.current.getBoundingClientRect();
-        const distanceScrolled = Math.max(0, -rect.top);
-        const stepDistance = (STEP_VH / 100) * window.innerHeight;
-        const stepIndex = Math.floor(distanceScrolled / stepDistance);
-        setActive(Math.min(STEPS.length - 1, stepIndex));
-      });
-    };
-
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    update();
-
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      if (frame !== null) window.cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  const selectStep = (index) => {
-    setActive(index);
-    if (window.innerWidth < 760 || !sectionRef.current) return;
-
-    const rect = sectionRef.current.getBoundingClientRect();
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    window.scrollTo({
-      top:
-        rect.top +
-        window.scrollY +
-        index * (STEP_VH / 100) * window.innerHeight +
-        1,
-      behavior: reduceMotion ? "auto" : "smooth",
-    });
-  };
+    if (paused || reduceMotion) return undefined;
+
+    const timer = window.setInterval(
+      () => setActiveSlide((current) => (current + 1) % HERO_SLIDES.length),
+      5500,
+    );
+    return () => window.clearInterval(timer);
+  }, [paused]);
 
   return (
-    <section
-      className="how-scroll"
-      id="how"
-      ref={sectionRef}
-      style={{
-        "--steps": STEPS.length,
-        "--scroll-runway": `${STEP_VH * (STEPS.length - 1)}vh`,
-      }}
-    >
-      <div className="how-scroll__sticky">
-        <div className="wrap how">
-          <div className="how__list">
-            <p className="kicker">How it works</p>
-            <h2>Four steps from scan to sorted.</h2>
-            <ol>
-              {STEPS.map((s, i) => (
-                <li key={s.title}>
-                  <button
-                    type="button"
-                    className={i === active ? "is-active" : ""}
-                    aria-pressed={i === active}
-                    onClick={() => selectStep(i)}
-                  >
-                    <span className="num">{i + 1}</span>
-                    <span>
-                      <b>{s.title}</b>
-                      <small>{s.text}</small>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ol>
-            <div
-              className="how__progress"
-              role="progressbar"
-              aria-label="How it works progress"
-              aria-valuemin={1}
-              aria-valuemax={STEPS.length}
-              aria-valuenow={active + 1}
-            >
-              <span
-                style={{ width: `${((active + 1) / STEPS.length) * 100}%` }}
-              />
-            </div>
-          </div>
-          <div className="how__stage">
-            <div className="stage__bg" />
-            <Phone screen={active} />
-          </div>
+    <section className="hero">
+      <div className="wrap hero-showcase">
+        <div className="hero-showcase__slides">
+          {HERO_SLIDES.map((item, index) => (
+            <img
+              className="hero-showcase__image"
+              data-active={activeSlide === index}
+              src={item.image}
+              alt={activeSlide === index ? item.alt : ""}
+              fetchPriority={index === 0 ? "high" : "low"}
+              key={item.name}
+            />
+          ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- Bento ---------- */
-function Mini({ id }) {
-  if (id === "route")
-    return (
-      <div className="mini mini--route">
-        <div className="basket">
-          Basket<b>4 items</b>
-        </div>
-        <span className="arrow">→</span>
-        <div className="lanes">
-          <span className="lane lane--k">Counter · 2</span>
-          <span className="lane lane--g">Stylist · 1</span>
-          <span className="lane lane--b">Service desk · 1</span>
-        </div>
-      </div>
-    );
-  if (id === "pay")
-    return (
-      <div className="mini mini--pay">
-        <b>0%</b>
-        <small>taken from your sales</small>
-      </div>
-    );
-  if (id === "ai")
-    return (
-      <div className="mini mini--ai">
-        <div className="paper">
-          <i />
-          <i />
-          <i />
-        </div>
-        <span>→</span>
-        <div className="digital">
-          <i />
-          <i />
-          <i />
-        </div>
-      </div>
-    );
-  if (id === "hotel")
-    return (
-      <div className="mini mini--hotel">
-        <span>Customer request</span>
-        <b>In progress</b>
-      </div>
-    );
-  return (
-    <div className="mini mini--delivery">
-      <span>🛵</span>
-      <small>Your store link</small>
-    </div>
-  );
-}
-
-function Bento() {
-  return (
-    <section className="section section--dark" id="features">
-      <div className="wrap feat">
-        <div className="feat__intro">
-          <p className="kicker kicker--light">Features</p>
-          <h2>Everything your business needs to meet customers online.</h2>
+        <div className="hero-showcase__shade" aria-hidden="true" />
+        <div className="hero-showcase__copy">
+          <h1>
+            Your business,
+            <br />
+            <em>one scan away.</em>
+          </h1>
           <p>
-            Give customers one place to find what you offer, make a request and
-            follow its progress.
+            Menus, products and services on one page. Let customers scan to
+            browse, order or make a request.
           </p>
-          <a className="btn btn--tomato" href="/signup">
-            Get started
-          </a>
+          <div className="hero-showcase__actions">
+            <a className="hero-showcase__primary" href="/signup">
+              Create your page <span aria-hidden="true">↗</span>
+            </a>
+            <a className="hero-showcase__secondary" href="/dashboard">
+              Try the demo <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
-        <div className="feat__list">
-          {FEATURES.map((feature, index) => (
-            <article className="feat__row" key={feature.id}>
-              <span className="feat__num">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div className="feat__text">
-                <h3>{feature.title}</h3>
-                <p>{feature.text}</p>
-              </div>
-              <div className="feat__visual">
-                <Mini id={feature.id} />
-              </div>
-            </article>
+        <div className="hero-showcase__business" aria-live="polite">
+          <span>{slide.category}</span>
+          <strong>{slide.name}</strong>
+          <small>Sample business</small>
+        </div>
+        <button
+          type="button"
+          className="hero-showcase__pause"
+          onClick={() => setPaused((value) => !value)}
+          aria-label={paused ? "Play hero slideshow" : "Pause hero slideshow"}
+        >
+          {paused ? "▶" : "Ⅱ"}
+        </button>
+        <div className="hero-showcase__dots" aria-label="Business examples">
+          {HERO_SLIDES.map((item, index) => (
+            <button
+              type="button"
+              key={item.name}
+              className={activeSlide === index ? "is-on" : ""}
+              onClick={() => setActiveSlide(index)}
+              aria-label={`Show ${item.category}`}
+              aria-current={activeSlide === index ? "true" : undefined}
+            />
           ))}
         </div>
       </div>
     </section>
   );
 }
+
+
+
+/* ---------- interactive industry previews ---------- */
+const INDUSTRIES = [
+  { id:"hotels", label:"Hotels", eyebrow:"Hotels", title:"Room services", name:"Azure Palm Hotel", demo:"Guest services", image:hotelHeroImage, text:"Let guests scan from their room to order food, request housekeeping or arrange transport.", action:"Review request", items:[["Breakfast in bed","Delivered to your room"],["Fresh towels","Housekeeping request"],["Airport transfer","Book a pickup"]] },
+  { id:"restaurants", label:"Restaurants", eyebrow:"Restaurants", title:"Table menu", name:"Pepper & Palm", demo:"Table 04", image:restaurantHeroImage, text:"Show diners what’s cooking, with prices in one place. Guests can choose dishes and review the table’s order.", action:"Review order", items:[["Smoky jollof & chicken","₦6,500"],["Golden plantain","₦2,000"],["House zobo","₦1,500"]] },
+  { id:"cafes", label:"Cafés", eyebrow:"Cafés", title:"Coffee menu", name:"Sunday Coffee", demo:"Counter menu", image:cafeHeroImage, text:"Customers can scan, choose a drink and prepare their pickup order before reaching the counter.", action:"Review order", items:[["Flat white","₦2,800"],["Cold brew","₦3,200"],["Banana loaf","₦2,100"]] },
+  { id:"shops", label:"Shops", eyebrow:"Shops & retail", title:"Product catalogue", name:"Mode & Co.", demo:"Shop collection", image:retailHeroImage, text:"Turn shelves and displays into browsable product pages customers can scan, save and order from.", action:"Review basket", items:[["Leather carry bag","₦62,000"],["Everyday runners","₦39,500"],["Wireless headphones","₦48,500"]] },
+  { id:"services", label:"Service businesses", eyebrow:"Service businesses", title:"Salon services", name:"June Hair Studio", demo:"Service directory", image:retailHeroImage, text:"Show clients the services you offer. They can choose what they need and prepare an enquiry before discussing dates and availability.", action:"Review enquiry", items:[["Styling consultation","30 minutes"],["Braiding appointment","Protective styling"],["Colour consultation","By appointment"]] },
+];
+
+function How() {
+  const [industryId, setIndustryId] = useState("services");
+  const [selected, setSelected] = useState([]);
+  const [customItems, setCustomItems] = useState({});
+  const industry = INDUSTRIES.find((item) => item.id === industryId);
+  const listings = [...industry.items, ...(customItems[industryId] || [])];
+  const chooseIndustry = (id) => { setIndustryId(id); setSelected([]); };
+  const toggleItem = (name) => setSelected((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name]);
+  const addListing = (event) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const name = form.get("item").trim();
+    const detail = form.get("detail").trim();
+    if (!name || !detail) return;
+    setCustomItems((current) => ({ ...current, [industryId]: [...(current[industryId] || []), [name, detail]] }));
+    event.currentTarget.reset();
+  };
+
+  return (
+    <section className="industries" id="industries">
+      <div className="wrap">
+        <header className="industries__heading">
+          <h2>See it in <em>your business.</em></h2>
+          <p>Choose your industry to try the page your customers would see.</p>
+        </header>
+        <div className="industries__tabs" role="group" aria-label="Choose a business type">
+          {INDUSTRIES.map((item) => <button type="button" key={item.id} aria-pressed={industryId===item.id} onClick={()=>chooseIndustry(item.id)}>{item.label}</button>)}
+        </div>
+        <div className="industries__panel">
+          <div className="industries__copy">
+            <small>{industry.eyebrow}</small><h3>{industry.title}</h3><p>{industry.text}</p>
+            <a href="/signup">Open customer demo <span aria-hidden="true">↗</span></a>
+            <details className="industries__details">
+              <summary>Try adding your own listing</summary>
+              <form onSubmit={addListing}>
+                <label>Business name<input maxLength="80" defaultValue={industry.name} name="businessName" /></label>
+                <label>Product or service<input required maxLength="80" placeholder="e.g. Airport transfer" name="item" /></label>
+                <label>Service details<input required maxLength="100" placeholder="e.g. 30 minutes or ₦5,000" name="detail" /></label>
+                <button type="submit">Add to preview</button>
+                <small role="status">Changes last until you refresh.</small>
+              </form>
+            </details>
+          </div>
+          <div className="industries__preview-wrap">
+            <div className="customer-preview">
+              <div className="customer-preview__cover" style={{backgroundImage:`linear-gradient(0deg,rgba(8,29,22,.88),transparent),url(${industry.image})`}}>
+                <small>Demo · {industry.demo}</small><strong>{industry.name}</strong>
+              </div>
+              <div className="customer-preview__body"><h3>{industry.title}</h3>{listings.map(([name,detail])=><div className="customer-preview__item" key={name}><div><b>{name}</b><small>{detail}</small></div><button type="button" className={selected.includes(name)?"is-on":""} onClick={()=>toggleItem(name)} aria-label={`${selected.includes(name)?"Remove":"Select"} ${name}`}>{selected.includes(name)?"✓":"+"}</button></div>)}<button className="customer-preview__review">{industry.action}<span>{selected.length} selected</span></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 
 /* ---------- Numbers band ---------- */
 function Band() {
@@ -926,9 +834,9 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
-        <Marquee />
+       
         <How />
-        <Bento />
+      
         <Band />
         <Pricing />
         <Faq />

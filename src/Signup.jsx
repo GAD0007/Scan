@@ -2,15 +2,34 @@ import React, { useMemo, useState } from "react";
 import AuthMobileNav from "./AuthMobileNav.jsx";
 
 const BUSINESS_TYPES = [
-  { label: "Food and drink", icon: "🍲" },
-  { label: "Shop or retail", icon: "🛍️" },
-  { label: "Salon or spa", icon: "✂️" },
-  { label: "Hotel or stays", icon: "🛏️" },
-  { label: "Services or repairs", icon: "🛠️" },
-  { label: "Events or other", icon: "✦" },
+  { label: "Food and drink", icon: "food" },
+  { label: "Shop or retail", icon: "shop" },
+  { label: "Salon or spa", icon: "salon" },
+  { label: "Hotel or stays", icon: "hotel" },
+  { label: "Services or repairs", icon: "services" },
+  { label: "Events or other", icon: "events" },
 ];
 
 const STEPS = ["Choose your business type", "Add your details", "Review"];
+
+const BUSINESS_ICON_PATHS = {
+  food: ["M5 11h14", "M7 11a5 5 0 0 1 10 0", "M4 11a8 8 0 0 0 16 0", "M12 4v2", "M9 5l1 2", "M15 5l-1 2"],
+  shop: ["M4 9h16", "M5 9v11h14V9", "M3 9l2-5h14l2 5", "M9 20v-6h6v6", "M5 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"],
+  salon: ["M6 4l12 16", "M18 4 6 20", "M8 8 4 4", "M16 8l4 4", "M7 4a3 3 0 1 0 0 6", "M17 14a3 3 0 1 0 0 6"],
+  hotel: ["M3 20V5h18v15", "M7 9h3v3H7z", "M14 9h3v3h-3z", "M7 15h10", "M12 15v5"],
+  services: ["M14.5 6.5a4 4 0 0 0-5 5L4 17l3 3 5.5-5.5a4 4 0 0 0 5-5l-3 3-3-3z", "M16 4l4 4"],
+  events: ["M5 3v3M19 3v3M4 8h16", "M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1z", "M9 12l2 2 4-4"],
+};
+
+function BusinessTypeIcon({ name }) {
+  return (
+    <span className="su-type__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {BUSINESS_ICON_PATHS[name].map((path) => <path d={path} key={path} />)}
+      </svg>
+    </span>
+  );
+}
 
 function Signup() {
   const [step, setStep] = useState(0);
@@ -162,8 +181,9 @@ function Signup() {
                           setNotice("");
                         }}
                       >
-                        <span aria-hidden="true">{type.icon}</span>
-                        {type.label}
+                        <BusinessTypeIcon name={type.icon} />
+                        <span className="su-type__label">{type.label}</span>
+                        <span className="su-type__check" aria-hidden="true">✓</span>
                       </button>
                     ))}
                   </div>
